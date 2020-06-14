@@ -61,7 +61,7 @@ public class MainController : MonoBehaviour
         {
             case "init":
                 // 初始化队伍星球
-                JsonData teams = recieveData["Data"];
+                JsonData teams = recieveData["Data"]["Team"];
                 int count = teams.Count;
                 float singleAngle = 360 / count;
 
@@ -71,8 +71,9 @@ public class MainController : MonoBehaviour
                     Vector3 position = new Vector3(middleX + this.R * Mathf.Sin(i * (singleAngle / 180 * Mathf.PI)), .0f, middleZ + this.R * Mathf.Cos(i * (singleAngle / 180 * Mathf.PI)));
                     GameObject planet = Instantiate(this.planetObj, position, Quaternion.identity) as GameObject;
                     planet.GetComponent<SinglePlanet>().SetPosition(position);
-                    planet.GetComponent<SinglePlanet>().SetTeamName(teams[i].ToString());
-                    planet.GetComponent<SinglePlanet>().SetScoreRank(0, 0);     // 设置初始分数、排名
+
+                    planet.GetComponent<SinglePlanet>().SetTeamName(teams[i]["Name"].ToString());
+                    planet.GetComponent<SinglePlanet>().SetScoreRank(int.Parse(teams[i]["Score"].ToString()), int.Parse(teams[i]["Rank"].ToString()));     // 设置初始分数、排名
 
                     // 不显示状态
                     planet.GetComponent<SinglePlanet>().SetAttack(false);
@@ -82,8 +83,14 @@ public class MainController : MonoBehaviour
                     planet.GetComponent<SinglePlanet>().CenterCube = this.centerCube;       // 设置中间点方块
 
                     //使用队伍 ID 作为索引
-                    this.planetGroup[i] = planet;
+                    this.planetGroup[int.Parse(teams[i]["Id"].ToString())] = planet;
                 }
+
+                // 设置时间、轮数
+                int time = int.Parse(recieveData["Data"]["Time"].ToString());
+                timeText.GetComponent<TimeController>().SetTime(time);
+                this.round = int.Parse(recieveData["Data"]["Round"].ToString());
+                roundText.GetComponent<UnityEngine.UI.Text>().text = "第 " + this.round + " 轮";
 
                 break;
 
@@ -143,8 +150,7 @@ public class MainController : MonoBehaviour
 
             case "time":
                 // 设置剩余时间
-                int time = int.Parse(recieveData["Data"]["Time"].ToString());
-                timeText.GetComponent<TimeController>().SetTime(time);
+                timeText.GetComponent<TimeController>().SetTime(int.Parse(recieveData["Data"]["Time"].ToString()));
                 break;
 
             case "clear":
@@ -155,10 +161,10 @@ public class MainController : MonoBehaviour
 
             case "clearAll":
                 // 清空所有队伍状态
-                for (int i = 0; i < planetGroup.Count; i++)
+                foreach (KeyValuePair<int, GameObject> item in planetGroup)
                 {
-                    this.planetGroup[i].GetComponent<SinglePlanet>().SetDown(false);
-                    this.planetGroup[i].GetComponent<SinglePlanet>().SetAttack(false);
+                    item.Value.GetComponent<SinglePlanet>().SetDown(false);
+                    item.Value.GetComponent<SinglePlanet>().SetAttack(false);
                 }
                 break;
 

@@ -548,7 +548,7 @@ MonoBehaviour:
   roundText: {fileID: 262059518}
   messageBoard: {fileID: 0}
   roundTime: 300
-  url: ws://localhost:12345/websocket
+  url: ws://localhost:19999/api/asteroid
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
