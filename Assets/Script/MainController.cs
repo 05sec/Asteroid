@@ -21,6 +21,7 @@ public class MainController : MonoBehaviour
     public GameObject AnimateRock;  // 彩蛋动画陨石
 
     // UI
+    public GameObject titleText;
     public GameObject timeText;
     public GameObject roundText;
     public GameObject messageBoard;
@@ -34,6 +35,8 @@ public class MainController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        this.LoadConfigFile();
+
         this.planetObj = Resources.Load("Planet");
         this.timeText.GetComponent<TimeController>().timeSecond = this.roundTime;
 
@@ -44,6 +47,15 @@ public class MainController : MonoBehaviour
         webSocket.OnError = OnError;
         webSocket.OnClosed = OnClosed;
         webSocket.Open();
+    }
+
+    void LoadConfigFile()
+    {
+        INIParser iniParser = new INIParser();
+        iniParser.Open(Application.streamingAssetsPath + "/asteroid.ini");
+        this.url = iniParser.ReadValue("connect", "url", "ws://localhost:19999/api/asteroid");
+        this.R = iniParser.ReadValue("scene", "radius", 20);
+        iniParser.Close();
     }
 
 
@@ -60,6 +72,7 @@ public class MainController : MonoBehaviour
         switch (recieveData["Type"].ToString())
         {
             case "init":
+                this.titleText.GetComponent<UnityEngine.UI.Text>().text = recieveData["Data"]["Title"].ToString();
                 // 初始化队伍星球
                 JsonData teams = recieveData["Data"]["Team"];
                 int count = teams.Count;
