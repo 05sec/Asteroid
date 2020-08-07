@@ -26,11 +26,18 @@ public class MainController : MonoBehaviour
     public GameObject roundText;
     public GameObject messageBoard;
 
+    // 排行榜
+    public Transform rankListContent;       // 列表 Content
+    private GameObject rankItemPrefab;      // 单个 Item Prefab
+    private List<GameObject> rankItems;     // 存放 Item Prefab 实例
+
     // WebSocket
     private WebSocket webSocket;
     private int round = 1;
+    private string imageBaseURL = "";
     public int roundTime = 300; //默认 300s 一轮
     public string url = "";
+
 
     // Start is called before the first frame update
     void Start()
@@ -39,6 +46,9 @@ public class MainController : MonoBehaviour
 
         this.planetObj = Resources.Load("Planet");
         this.timeText.GetComponent<TimeController>().timeSecond = this.roundTime;
+
+        this.rankItemPrefab = Resources.Load("RankItem") as GameObject;
+        this.rankItems = new List<GameObject>();
 
         // Init websocket
         webSocket = new WebSocket(new Uri(url));
@@ -55,6 +65,7 @@ public class MainController : MonoBehaviour
         iniParser.Open(Application.streamingAssetsPath + "/asteroid.ini");
         this.url = iniParser.ReadValue("connect", "url", "ws://localhost:19999/api/asteroid");
         this.R = iniParser.ReadValue("scene", "radius", 20);
+        this.imageBaseURL = iniParser.ReadValue("connect", "image_url", "http://localhost:19999/api/uploads/");
         iniParser.Close();
     }
 
@@ -77,6 +88,9 @@ public class MainController : MonoBehaviour
                 JsonData teams = recieveData["Data"]["Team"];
                 int count = teams.Count;
                 float singleAngle = 360 / count;
+
+                // 刷新排行榜
+                this.UpdateRankList(teams);
 
                 for (int i = 0; i < count; i++)
                 {
@@ -138,9 +152,12 @@ public class MainController : MonoBehaviour
             case "rank":
                 // 设置队伍排行
                 JsonData teamRanks = recieveData["Data"]["Team"];
+                // 刷新排行榜
+                this.UpdateRankList(teamRanks);
+
                 for (int i = 0; i < teamRanks.Count; i++)
                 {
-
+                    // 星球
                     this.planetGroup[int.Parse(teamRanks[i]["Id"].ToString())].GetComponent<SinglePlanet>().SetScoreRank(
                         int.Parse(teamRanks[i]["Score"].ToString()),
                         int.Parse(teamRanks[i]["Rank"].ToString())
@@ -244,6 +261,45 @@ public class MainController : MonoBehaviour
 
         // 设置状态为被攻陷
         To.GetComponent<SinglePlanet>().SetAttack(true);
+    }
+
+    void UpdateRankList(JsonData teamRanks)
+    {
+        Dictionary<int, JsonData> rankListData = new Dictionary<int, JsonData>();
+
+        // 构造已经排序的列表
+        for (int i = 0; i < teamRanks.Count; i++)
+        {
+            rankListData.Add(int.Parse(teamRanks[i]["Rank"].ToString()), teamRanks[i]);
+        }
+
+        // 创建 rankItem 实例，之后不够的再补
+        int newItemCount = teamRanks.Count - rankItems.Count;
+        for (int i = 0; i < newItemCount; i++)
+        {
+            GameObject item = Instantiate(rankItemPrefab, rankListContent, false);
+            rankItems.Add(item);
+        }
+
+        // 刷新排行榜
+        for (int i = 0; i < teamRanks.Count; i++)
+        {
+            RankItem item = rankItems[i].GetComponent<RankItem>();
+            JsonData data = rankListData[i + 1];
+
+            item.SetTeamName(data["Name"].ToString());
+            item.SetTeamRank(data["Rank"].ToString());
+            item.SetTeamScore(data["Score"].ToString());
+
+            if (rankListData[i + 1]["Image"] != null)
+            {
+                string imageURL = rankListData[i + 1]["Image"].ToString();
+                if (imageURL != "")
+                {
+                    StartCoroutine(item.SetTeamLogo(imageBaseURL + "/" + imageURL));
+                }
+            }
+        }
     }
 
 
