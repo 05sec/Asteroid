@@ -16,7 +16,10 @@ CTF AWD 实时 3D 攻击大屏
 [阅读使用文档](https://cardinal.ink/asteroid/install.html)
 
 ## 耻辱柱 Hall of Shame
-![](https://z3.ax1x.com/2021/10/09/5kd1mQ.jpg)
+
+这就是国内开源现状，真是太厉害了8！
+
+https://github.com/Cardinal-Platform/Hall-of-Shame
 
 ## LICENSE
 Apache License 2.0
