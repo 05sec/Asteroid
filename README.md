@@ -1,6 +1,8 @@
 # Asteroid
 CTF AWD 实时 3D 攻击大屏
 
+## 项目简介
+
 本项目后端已整合进 [Cardinal](https://github.com/vidar-team/Cardinal) AWD 比赛平台。
 
 若需二次开发，可参考独立后端：https://github.com/wuhan005/Asteroid_backend
@@ -13,8 +15,8 @@ CTF AWD 实时 3D 攻击大屏
 ## 开始使用
 [阅读使用文档](https://cardinal.ink/asteroid/install.html)
 
-## 支持
-<img src="https://img.cdn.n3ko.co/lsky/2020/05/23/b6db2d0e32963.png" width=250px/>
+## 耻辱柱 Hall of Shame
+![](https://z3.ax1x.com/2021/10/09/5kd1mQ.jpg)
 
 ## LICENSE
 Apache License 2.0
